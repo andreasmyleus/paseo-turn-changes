@@ -20,7 +20,7 @@ test("格式化后仍能审核记录中的编辑和行数，不能伪造可撤�
     assert.equal(shown.reviewKind, "edits");
     assert.deepEqual([shown.additions, shown.deletions], [1, 1]);
     assert.match(shown.patch, /-const x='old'\n\+const x='new'/);
-    assert.match(shown.issue!, /格式化.*撤销不可用/);
+    assert.match(shown.issue!, /formatting.*undo is unavailable/);
     assert.equal(shown.before, null);
     assert.equal(shown.after, null);
   } finally {
@@ -37,12 +37,12 @@ test("外部路径只显示工具保存的差异，不读取该路径或开放�
   );
   const shown = reviewFile(file);
   assert.deepEqual([shown.additions, shown.deletions], [1, 1]);
-  assert.match(shown.issue!, /工作目录外.*撤销不可用/);
+  assert.match(shown.issue!, /outside the working directory.*undo is unavailable/);
   assert.match(shown.patch, /-a\n\+b/);
   assert.equal(shown.before, null);
 });
 
-test("仅有 newString 时显示修改后内容，不把未知旧内容当作新增文件", async () => {
+test("仅有 newString 时显示Content after edit，不把未知旧内容当作新增文件", async () => {
   const items = [
     {
       type: "tool_call",
@@ -105,7 +105,7 @@ test("OMP 展示差异不覆盖前后文本，已中断轮次仍能恢复已完�
         after: null,
         additions: null,
         deletions: null,
-        issue: "此改动没有文本差异，可能是二进制、权限或重命名操作。",
+        issue: "This change has no text diff; it may be a binary, permission or rename change.",
       },
     ],
   } as Record;

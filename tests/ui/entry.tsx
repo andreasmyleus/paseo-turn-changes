@@ -40,13 +40,13 @@ function Preview() {
     >
       <main style={{ maxWidth: compact ? 366 : 1000, margin: "0 auto" }}>
         <p style={{ color: theme.colors.foregroundMuted, fontSize: 13 }}>
-          交互预览 · 真实插件组件使用模拟数据；面板、弹窗和设置控件为测试替身。
+          交互预览 · 真实插件组件使用模拟数据; 面板、弹窗和设置控件为测试替身。
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button onClick={() => setLight(!light)}>{light ? "深色" : "浅色"}</button>
           <button onClick={() => setCompact(!compact)}>{compact ? "桌面宽度" : "手机宽度"}</button>
           <button onClick={() => setSettings(!settings)}>
-            {settings ? "查看改动" : "数据来源设置"}
+            {settings ? "查看改动" : "Data source settings"}
           </button>
         </div>
         {settings ? (
@@ -68,7 +68,7 @@ function Preview() {
       </main>
       {panel && (
         <aside
-          aria-label="本轮代码差异"
+          aria-label="This turn's code diff"
           style={{
             position: "fixed",
             right: 0,

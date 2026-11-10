@@ -11,7 +11,7 @@ test("差异保留行号与代码内容，清理补丁头并分别高亮修改�
     undefined,
     "a.ts",
   );
-  assert.equal(lines[0].text, "省略 33 行");
+  assert.equal(lines[0].text, "33 lines hidden");
   assert.equal(
     lines.some((line) => line.text.startsWith("Index:")),
     false,
@@ -30,7 +30,7 @@ test("差异保留行号与代码内容，清理补丁头并分别高亮修改�
 test("重复编辑分段，不把上下文行或只有新内容的文件标成新增", () => {
   const patch = "--- a.ts\n+++ a.ts\n@@ -1 +1 @@\n-a\n+b\n";
   const lines = reviewLines(patch + patch, undefined, "a.unknown");
-  assert.ok(lines.some((line) => line.text === "下一次编辑记录"));
+  assert.ok(lines.some((line) => line.text === "Next edit"));
   assert.equal(lines.filter((line) => line.kind === "add").length, 2);
   const content = reviewLines("", "const a = 1;\n", "a.ts");
   assert.ok(content.every((line) => line.kind === "context" && line.oldLine === null));
@@ -53,7 +53,7 @@ test("未识别的差异格式仍保留原文供审核", () => {
 test("禁用撤销提示汇总并去重原因，可撤销时无提示", async () => {
   const summary = (await createFixture().invoke("changes.read", {})) as Summary;
   assert.equal(undoHint(summary), undefined);
-  const reason = "工作目录外文件，仅供查看，自动撤销不可用。";
+  const reason = "File outside the working directory, view only, automatic undo is unavailable.";
   assert.equal(
     undoHint({
       ...summary,
@@ -61,6 +61,6 @@ test("禁用撤销提示汇总并去重原因，可撤销时无提示", async ()
       issues: [reason],
       files: [{ ...summary.files[0], issue: reason }],
     }),
-    `无法撤销：\n${reason}`,
+    `Cannot undo:\n${reason}`,
   );
 });

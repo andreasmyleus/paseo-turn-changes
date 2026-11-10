@@ -46,7 +46,7 @@ function historical(): Record {
         deletions: 1,
         before: null,
         after: null,
-        issue: "文件的新增或删除状态与编辑记录不一致。",
+        issue: "The file's added or deleted state does not match the edit record.",
       },
     ],
   } as Record;
@@ -71,7 +71,7 @@ test("Codex 重命名保留原路径与目标路径，修复已有旧卡片而�
   assert.equal(captured.length, 1);
   assert.equal(captured[0].path, "new/Identifier.kt");
   assert.equal(captured[0].previousPath, "old/Monitor.kt");
-  assert.match(captured[0].issue!, /重命名/);
+  assert.match(captured[0].issue!, /rename/);
   assert.equal(reviewRecord({ ...original, files: captured }, enriched, [call]).files.length, 1);
 });
 

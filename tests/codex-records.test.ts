@@ -48,7 +48,7 @@ test("同一 Codex 调用补回新增差异和多文件，不伪造撤销快照"
         content: "new\nfile\n",
         additions: null,
         deletions: null,
-        issue: "文件不在当前工作目录内。",
+        issue: "File is outside the current working directory.",
       },
     ],
   } as Record;
@@ -126,7 +126,7 @@ test("其他会话、调用、失败结果、无新增标记的正文均保留�
   assert.deepEqual(codexRecordedItems([call], [unknown], sessionId, "/repo"), [call]);
   assert.equal(recordedEdits("new.ts", editsFromItems([call])).patch, "");
 });
-test("绑定本机 Codex 会话日志；错误元数据和缺失日志不补充", async () => {
+test("绑定本机 Codex 会话日志; 错误元数据和缺失日志不补充", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "turn-codex-"));
   try {
     await mkdir(path.join(root, "sessions", "2026"), { recursive: true });

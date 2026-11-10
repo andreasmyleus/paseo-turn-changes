@@ -20,13 +20,13 @@ export default function contribute(client: PluginClientContext) {
   });
   client.addSettingsScreen({
     id: "sources",
-    title: "数据来源",
+    title: "Data source",
     icon: "SlidersHorizontal",
     Component: SourcesSettings,
   });
   client.addWorkspacePanel({
     id: "history",
-    title: "每轮改动",
+    title: "Turn changes",
     icon: "FileDiff",
     context: "agent",
     locations: ["workspace", "explorer"],
@@ -38,7 +38,7 @@ export default function contribute(client: PluginClientContext) {
   });
   client.addWorkspacePanel({
     id: "review",
-    title: "本轮代码差异",
+    title: "This turn's code diff",
     icon: "FileDiff",
     context: "agent",
     locations: ["explorer"],
@@ -50,7 +50,7 @@ export default function contribute(client: PluginClientContext) {
   });
   client.addCommandCenterItem({
     id: "history",
-    title: "查看每轮改动",
+    title: "View turn changes",
     icon: "FileDiff",
     context: "agent",
     onSelect({ openPanel }) {
@@ -59,7 +59,7 @@ export default function contribute(client: PluginClientContext) {
   });
   client.addCommandCenterItem({
     id: "sources",
-    title: "配置每轮改动来源",
+    title: "Configure turn changes source",
     icon: "Settings",
     context: "global",
     onSelect({ openSettings }) {

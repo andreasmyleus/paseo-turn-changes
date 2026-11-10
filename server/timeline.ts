@@ -6,7 +6,7 @@ export async function turnItems(
   turnId: string | null,
   previous?: { epoch: string; maxSeq: number },
 ): Promise<{ items: unknown[]; timeline: { epoch: string; maxSeq: number } }> {
-  if (!turnId) throw new Error("执行后端未提供轮次编号，无法可靠划分本轮编辑。");
+  if (!turnId) throw new Error("The agent backend gave no turn id, so this turn's edits cannot be separated reliably.");
   const timeline = paseo.agents.ref(agentId).timeline;
   let page = await timeline.refetch({ limit: 200, projection: "canonical" });
   const epoch = page.epoch;
@@ -15,7 +15,7 @@ export async function turnItems(
   let found = false;
   for (let count = 0; count < 50; count++) {
     if (page.error || page.gap || page.staleCursor || page.epoch !== epoch)
-      throw new Error("对话记录发生变化或不完整，请重新核验本轮改动。");
+      throw new Error("The conversation timeline changed or is incomplete. Re-check this turn's changes.");
     let boundary = false;
     for (const entry of [...page.entries].reverse()) {
       if (entry.seqEnd <= minimum) {
@@ -31,7 +31,7 @@ export async function turnItems(
       }
     }
     if (boundary || !page.hasOlder) {
-      if (!found) throw new Error("未找到本轮的完整对话记录。");
+      if (!found) throw new Error("The complete timeline for this turn was not found.");
       const calls = new Map<string, { seq: number; item: unknown }>();
       for (const entry of selected) {
         if (entry.item.type !== "tool_call") continue;
@@ -45,7 +45,7 @@ export async function turnItems(
         timeline: { epoch, maxSeq },
       };
     }
-    if (!page.startCursor) throw new Error("对话记录缺少分页位置。");
+    if (!page.startCursor) throw new Error("The conversation timeline is missing a page cursor.");
     page = await timeline.refetch({
       limit: 200,
       projection: "canonical",
@@ -53,5 +53,5 @@ export async function turnItems(
       cursor: page.startCursor,
     });
   }
-  throw new Error("本轮对话记录过长，未取得完整编辑记录。");
+  throw new Error("This turn's timeline is too long, the edit history is incomplete.");
 }

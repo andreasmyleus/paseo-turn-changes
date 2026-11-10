@@ -52,16 +52,16 @@ test("跨页选取本轮最终编辑，不混入前后轮次", async () => {
   assert.equal(count(), 2);
 });
 
-test("轮次编号复用时以上轮序号为边界；分页缺口明确失败", async () => {
+test("轮次编号复用时以上轮序号为边界; 分页缺口明确失败", async () => {
   const { paseo } = mock([{ entries: [entry("same", 2), entry("same", 6)] }]);
   const result = await turnItems(paseo, "agent", "same", { epoch: "epoch", maxSeq: 4 });
   assert.deepEqual(result.items, [entry("same", 6).item]);
   await assert.rejects(
     turnItems(mock([{ entries: [], gap: true }]).paseo, "agent", "same"),
-    /不完整/,
+    /incomplete/,
   );
   await assert.rejects(
     turnItems(mock([{ entries: [entry("other", 2)] }]).paseo, "agent", "missing"),
-    /未找到/,
+    /not found/,
   );
 });

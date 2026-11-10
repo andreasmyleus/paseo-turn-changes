@@ -43,7 +43,7 @@ test("本轮固定使用开始时的配置，Codex 原生数据缺失不切换�
     ]);
     assert.equal(first.source, "native");
     assert.equal(first.canUndo, false);
-    assert.match(first.issues[0], /未转发/);
+    assert.match(first.issues[0], /does not forward/);
     const second: TurnStart = { ...start, turnId: "turn-2" };
     await capture.start(second);
     const result = await capture.finish(
@@ -59,7 +59,7 @@ test("本轮固定使用开始时的配置，Codex 原生数据缺失不切换�
   }
 });
 
-test("失败轮次也保存原生差异；插件重载后读取原始记录", async () => {
+test("失败轮次也保存原生差异; 插件重载后读取原始记录", async () => {
   const cwd = await mkdtemp(path.join(tmpdir(), "turn-capture-"));
   try {
     const store = new Store(path.join(cwd, "state"));
@@ -111,7 +111,7 @@ test("未提供原生接口时，即使没有编辑条目也明确提示，并�
     };
     await capture.start(event);
     const record = await capture.finish(event, []);
-    assert.match(record.issues[0], /未转发/);
+    assert.match(record.issues[0], /does not forward/);
     assert.equal(record.outcome, "failed");
     assert.equal(record.canUndo, false);
     assert.equal((await new Store(store.directory).nativeStatus()).codex.available, false);
@@ -238,7 +238,7 @@ test("重载后恢复持久化的开始记录，缺少开始记录时仍禁止�
     assert.equal((await store.list("agent")).length, 1);
     const missing = await new Capture(store).finish({ ...event, turnId: "missing" }, []);
     assert.equal(missing.canUndo, false);
-    assert.match(missing.issues[0], /缺少本轮开始记录/);
+    assert.match(missing.issues[0], /Missing the start record/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

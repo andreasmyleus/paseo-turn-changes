@@ -66,19 +66,19 @@ test("文件已被再次修改或路径越界时，标明无法还原", async ()
       cwd,
       parseDiff(createTwoFilesPatch("a.txt", "a.txt", "old\n", "new\n")),
     );
-    assert.match(file.issue!, /不一致/);
+    assert.match(file.issue!, /does not match/);
     assert.equal(file.additions, null);
     const [outside] = await reconstruct(
       cwd,
       parseDiff(createTwoFilesPatch("../outside.txt", "../outside.txt", "old\n", "new\n")),
     );
-    assert.match(outside.issue!, /工作目录/);
+    assert.match(outside.issue!, /working directory/);
     await symlink("/tmp", path.join(cwd, "link"));
     const [linked] = await reconstruct(
       cwd,
       parseDiff(createTwoFilesPatch("link/a", "link/a", "old\n", "new\n")),
     );
-    assert.match(linked.issue!, /符号链接/);
+    assert.match(linked.issue!, /Symbolic link/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -96,7 +96,7 @@ test("Git 的中文转义路径解码为真实文件名，并保留原生差异�
     assert.equal(file.issue, null);
     await writeFile(path.join(cwd, "文.txt"), "later\n");
     const [changed] = await nativeFiles(cwd, diff);
-    assert.match(changed.issue!, /不一致/);
+    assert.match(changed.issue!, /does not match/);
     assert.deepEqual([changed.additions, changed.deletions], [1, 1]);
     assert.match(changed.patch, /-old\n\+new/);
     assert.equal(changed.before, null);

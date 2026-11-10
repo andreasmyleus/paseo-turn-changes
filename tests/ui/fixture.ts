@@ -76,12 +76,12 @@ export function createFixture(longPaths = false) {
     if (method === "changes.read") return record;
     if (method === "changes.list") return [record];
     if (method === "changes.source") {
-      if (state.failSource) throw new Error("源文件已删除或移动，未找到可打开的实际文件。");
+      if (state.failSource) throw new Error("Source file was deleted or moved, no file found to open.");
       return source;
     }
     if (method === "changes.source.save") {
       if (state.sourceConflict || input.revision !== source.revision)
-        throw new Error("源文件已在其他地方修改，未保存。草稿已保留。");
+        throw new Error("Source file was modified elsewhere, not saved. Your draft is kept.");
       source = { ...source, content: input.content!, revision: source.revision + "-saved" };
       return source;
     }
@@ -93,7 +93,7 @@ export function createFixture(longPaths = false) {
       };
     }
     if (method === "changes.undo") {
-      if (state.failUndo) throw new Error("文件已有后续修改，未撤销任何文件。");
+      if (state.failUndo) throw new Error("file has been modified since, no files were undone.");
       record = { ...record, canUndo: false, undoState: "done", undoneAt: new Date().toISOString() };
       return record;
     }
@@ -102,7 +102,7 @@ export function createFixture(longPaths = false) {
       return { codex: { available: false, observedAt: "2026-09-11T08:00:00Z" } };
     if (method === "sources.save") {
       if (input.revision !== settings.revision)
-        throw new Error("设置已在另一处修改，请刷新后重新保存。");
+        throw new Error("Settings were changed elsewhere. Refresh and save again.");
       settings = {
         revision: String(Number(settings.revision) + 1 || 1),
         values: settingsSchema.parse(input.values),

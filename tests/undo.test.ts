@@ -57,11 +57,11 @@ test("任何文件存在后续修改时，整轮拒绝撤销且不触碰其他�
   const { cwd, store, record } = await fixture();
   try {
     await writeFile(path.join(cwd, "second.txt"), "user's later change\n");
-    await assert.rejects(undo(store, record.id, "agent"), /已有后续修改/);
+    await assert.rejects(undo(store, record.id, "agent"), /modified since/);
     assert.equal(await readFile(path.join(cwd, "first.txt"), "utf8"), "new\n");
     assert.equal(await readFile(path.join(cwd, "second.txt"), "utf8"), "user's later change\n");
     assert.equal((await store.get(record.id, "agent")).undoneAt, null);
-    await assert.rejects(undo(store, record.id, "other-agent"), /不属于/);
+    await assert.rejects(undo(store, record.id, "other-agent"), /does not belong/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

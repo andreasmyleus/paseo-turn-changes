@@ -26,7 +26,7 @@ export class Capture {
       startedAt: new Date().toISOString(),
       finishedAt: "",
       outcome: "incomplete",
-      issues: ["本轮尚未结束；若记录期间插件停止，需要重新核验。"],
+      issues: ["The turn has not ended yet; if the plugin stops while recording, re-check it."],
       files: [],
       canUndo: false,
       undoneAt: null,
@@ -66,7 +66,7 @@ export class Capture {
     if (record.requestedSource === "auto") {
       record.source = event.nativeDiff === undefined ? "edits" : "native";
     }
-    if (missingStart) record.issues.push("缺少本轮开始记录，撤销不可用。");
+    if (missingStart) record.issues.push("Missing the start record for this turn, undo is unavailable.");
     try {
       const edits = editsFromItems(items);
       if (record.source === "native") {
@@ -75,8 +75,8 @@ export class Capture {
         } else if (event.nativeDiff === undefined || edits.length || timelineIssue) {
           record.issues.push(
             event.nativeDiff === undefined
-              ? "当前 Paseo 未转发原生本轮差异。官方 0.8.0 仍需加载接入补丁；未自动切换来源。"
-              : "执行后端未提供本轮差异，无法生成完整改动记录。",
+              ? "This Paseo build does not forward the native turn diff. Official 0.8.0 still needs the integration patch; the source was not switched automatically."
+              : "The agent backend gave no diff for this turn, so no complete change record could be made.",
           );
         }
       } else {

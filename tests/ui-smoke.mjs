@@ -24,7 +24,7 @@ await build({
   },
 });
 const script = await readFile(path.join(output, "ui-preview.js"), "utf8");
-const html = `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>每轮改动 · 交互预览</title><style>body{margin:0}button,select,input{font:inherit;padding:7px 10px;border:1px solid #888;border-radius:6px}button{cursor:pointer}h3{margin:0}</style><div id="root"></div><script>${script.replace(/<\/script/gi, "<\\/script")}</script></html>`;
+const html = `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Turn changes · 交互预览</title><style>body{margin:0}button,select,input{font:inherit;padding:7px 10px;border:1px solid #888;border-radius:6px}button{cursor:pointer}h3{margin:0}</style><div id="root"></div><script>${script.replace(/<\/script/gi, "<\\/script")}</script></html>`;
 await writeFile(path.join(output, "preview.html"), html);
 const dom = new JSDOM('<!doctype html><div id="root"></div>', {
   url: "http://localhost/",
@@ -60,10 +60,10 @@ function click(label) {
   button.click();
 }
 try {
-  await until(() => document.body.textContent.includes("已编辑 2 个文件"));
+  await until(() => document.body.textContent.includes("Edited 2 files"));
   const card = document.querySelector('[data-testid="turn-changes-card"]');
   assert.ok(card.textContent.includes("/repo/src/agent/change-tracker.ts"));
-  assert.ok(card.textContent.includes("重命名自 /repo/src/agent/old-tracker.ts"));
+  assert.ok(card.textContent.includes("Renamed from /repo/src/agent/old-tracker.ts"));
   assert.equal(card.textContent.includes("文件编辑记录汇总"), false);
   assert.equal(card.textContent.includes("自动选择"), false);
   assert.ok(document.body.textContent.includes("+2"));
@@ -74,22 +74,22 @@ try {
     filePath.querySelector('[data-testid="turn-file-basename"]').textContent,
     "/change-tracker.ts",
   );
-  click("复制完整路径 /repo/src/agent/change-tracker.ts");
+  click("Copy full path /repo/src/agent/change-tracker.ts");
   await until(() => dom.window.TurnPreview.clipboard.text === "/repo/src/agent/change-tracker.ts");
   assert.equal(dom.window.TurnPreview.openedPanels.length, 0);
   assert.equal(document.querySelector('[role="dialog"]'), null);
   dom.window.TurnPreview.clipboard.fail = true;
-  click("复制完整路径 /repo/src/agent/old-tracker.ts");
-  await until(() => document.querySelector('[title="复制失败，点击重试"]'));
+  click("Copy full path /repo/src/agent/old-tracker.ts");
+  await until(() => document.querySelector('[title="Copy failed, click to retry"]'));
   assert.equal(dom.window.TurnPreview.clipboard.text, "/repo/src/agent/change-tracker.ts");
   dom.window.TurnPreview.clipboard.fail = false;
-  click("复制完整路径 /repo/src/agent/old-tracker.ts");
+  click("Copy full path /repo/src/agent/old-tracker.ts");
   await until(() => dom.window.TurnPreview.clipboard.text === "/repo/src/agent/old-tracker.ts");
   assert.equal(dom.window.TurnPreview.openedPanels.length, 0);
-  click("审核");
+  click("Review");
   await until(() => document.body.textContent.includes("const source = 'native';"));
   assert.ok(
-    document.querySelector("aside").textContent.includes("重命名自 /repo/src/agent/old-tracker.ts"),
+    document.querySelector("aside").textContent.includes("Renamed from /repo/src/agent/old-tracker.ts"),
   );
   assert.deepEqual(JSON.parse(JSON.stringify(dom.window.TurnPreview.openedPanels[0])), {
     id: "review",
@@ -98,20 +98,20 @@ try {
     location: "explorer",
   });
   assert.equal(document.querySelector('[role="dialog"]'), null);
-  assert.ok(document.querySelector('[aria-label="原行号 1"]'));
-  assert.ok(document.querySelector('[aria-label="新行号 1"]'));
+  assert.ok(document.querySelector('[aria-label="Old line 1"]'));
+  assert.ok(document.querySelector('[aria-label="New line 1"]'));
   assert.ok(document.querySelector('[data-testid="turn-diff-add"]'));
   assert.ok(document.querySelector('[data-testid="turn-diff-delete"]'));
   assert.equal(document.body.textContent.includes("--- src/"), false);
-  click("打开源文件");
-  await until(() => document.body.textContent.includes("源文件已删除或移动"));
+  click("Open source file");
+  await until(() => document.body.textContent.includes("Source file was deleted or moved"));
   assert.ok(dom.window.TurnPreview.fixture.state.calls.includes("changes.source"));
-  click("下一个文件");
+  click("Next file");
   await until(() => document.body.textContent.includes("按轮次展示文件差异"));
-  assert.equal(document.body.textContent.includes("源文件已删除或移动"), false);
+  assert.equal(document.body.textContent.includes("Source file was deleted or moved"), false);
   dom.window.TurnPreview.fixture.state.failSource = false;
   const panelCount = dom.window.TurnPreview.openedPanels.length;
-  click("打开源文件");
+  click("Open source file");
   await until(() => document.querySelector('[data-testid="turn-source-input"]'));
   assert.equal(dom.window.location.href, "http://localhost/");
   assert.equal(dom.window.TurnPreview.openedPanels.length, panelCount);
@@ -125,69 +125,69 @@ try {
     sourceInput.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   };
   setSource("draft source\n");
-  await until(() => document.body.textContent.includes("未保存"));
-  click("返回差异");
-  await until(() => document.body.textContent.includes("还有未保存的修改"));
-  click("继续编辑");
+  await until(() => document.body.textContent.includes("Unsaved"));
+  click("Back to diff");
+  await until(() => document.body.textContent.includes("You have unsaved changes"));
+  click("Keep editing");
   dom.window.TurnPreview.fixture.state.sourceConflict = true;
-  click("保存");
-  await until(() => document.body.textContent.includes("草稿已保留"));
+  click("Save");
+  await until(() => document.body.textContent.includes("Your draft is kept"));
   assert.equal(sourceInput.value, "draft source\n");
   dom.window.TurnPreview.fixture.state.sourceConflict = false;
-  click("保存");
-  await until(() => document.body.textContent.includes("已保存"));
-  click("返回差异");
+  click("Save");
+  await until(() => document.body.textContent.includes("Saved"));
+  click("Back to diff");
   await until(() => !document.querySelector('[data-testid="turn-source-editor"]'));
   assert.ok(document.body.textContent.includes("2 / 2"));
-  click("显示文件列表");
+  click("Show file list");
   await until(() => document.querySelector('[data-testid="turn-file-tree"]'));
-  click("收起目录 /repo/src/agent");
+  click("Collapse folder /repo/src/agent");
   await until(
-    () => !document.querySelector('[aria-label="选择文件 /repo/src/agent/change-tracker.ts"]'),
+    () => !document.querySelector('[aria-label="Select file /repo/src/agent/change-tracker.ts"]'),
   );
-  click("展开目录 /repo/src/agent");
+  click("Expand folder /repo/src/agent");
   await until(() =>
-    document.querySelector('[aria-label="选择文件 /repo/src/agent/change-tracker.ts"]'),
+    document.querySelector('[aria-label="Select file /repo/src/agent/change-tracker.ts"]'),
   );
-  click("选择文件 /repo/src/agent/change-tracker.ts");
+  click("Select file /repo/src/agent/change-tracker.ts");
   await until(() => !document.querySelector('[data-testid="turn-file-tree"]'));
   await until(() => document.body.textContent.includes("const source = 'native';"));
-  click("显示文件列表");
-  await until(() => document.querySelector('[aria-label="筛选改动文件"]'));
-  const search = document.querySelector('[aria-label="筛选改动文件"]');
+  click("Show file list");
+  await until(() => document.querySelector('[aria-label="Filter changed files"]'));
+  const search = document.querySelector('[aria-label="Filter changed files"]');
   const setInput = Object.getOwnPropertyDescriptor(
     dom.window.HTMLInputElement.prototype,
     "value",
   ).set;
   setInput.call(search, "missing-file");
   search.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
-  await until(() => document.body.textContent.includes("没有匹配的文件"));
+  await until(() => document.body.textContent.includes("No matching files"));
   setInput.call(search, "readme");
   search.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   await until(() => document.querySelectorAll('[data-testid="turn-file-entry"]').length === 1);
-  click("选择文件 /repo/README.md");
+  click("Select file /repo/README.md");
   await until(() => document.body.textContent.includes("按轮次展示文件差异"));
   click("关闭审核面板");
   await until(() => !document.querySelector("aside"));
-  click("查看 /repo/src/agent/change-tracker.ts 的本轮差异");
+  click("View this turn's diff for /repo/src/agent/change-tracker.ts");
   await until(() => document.body.textContent.includes("const source = 'native';"));
   click("关闭审核面板");
   await until(() => !document.querySelector("aside"));
   dom.window.TurnPreview.fixture.state.failUndo = true;
-  click("撤销");
-  await until(() => document.body.textContent.includes("确认撤销"));
-  click("确认撤销");
-  await until(() => document.body.textContent.includes("文件已有后续修改"));
+  click("Undo");
+  await until(() => document.body.textContent.includes("Confirm undo"));
+  click("Confirm undo");
+  await until(() => document.body.textContent.includes("has been modified since"));
   dom.window.TurnPreview.fixture.state.failUndo = false;
-  click("确认撤销");
+  click("Confirm undo");
   await until(
     () =>
-      !document.querySelector('[role="dialog"]') && document.body.textContent.includes("已撤销"),
+      !document.querySelector('[role="dialog"]') && document.body.textContent.includes("Undone"),
   );
-  const disabledUndo = document.querySelector('[aria-label="已撤销"]');
+  const disabledUndo = document.querySelector('[aria-label="Undone"]');
   assert.equal(disabledUndo.getAttribute("aria-disabled"), "true");
-  assert.equal(disabledUndo.parentElement.title, "本轮改动已经撤销。");
-  assert.equal(document.body.textContent.includes("本轮改动已经撤销。"), false);
+  assert.equal(disabledUndo.parentElement.title, "This turn's changes have been undone.");
+  assert.equal(document.body.textContent.includes("This turn's changes have been undone."), false);
   disabledUndo.click();
   assert.equal(document.querySelector('[role="dialog"]'), null);
   click("手机宽度");
@@ -195,16 +195,16 @@ try {
   await until(() => document.body.textContent.includes("桌面宽度"));
   const compactPath = document.querySelector('[data-testid="turn-file-path"]');
   compactPath.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, button: 0 }));
-  await until(() => document.querySelector('[role="dialog"][aria-label="完整文件路径"]'));
+  await until(() => document.querySelector('[role="dialog"][aria-label="Full file path"]'));
   compactPath.dispatchEvent(new dom.window.MouseEvent("mouseup", { bubbles: true, button: 0 }));
   compactPath.click();
-  assert.equal(document.querySelector('[aria-label="本轮代码差异"]'), null);
-  click("复制路径");
-  await until(() => document.body.textContent.includes("已复制路径"));
+  assert.equal(document.querySelector(`[aria-label="This turn's code diff"]`), null);
+  click("Copy path");
+  await until(() => document.body.textContent.includes("Path copied"));
   assert.equal(dom.window.TurnPreview.clipboard.text, "/repo/src/agent/change-tracker.ts");
   click("关闭弹窗");
   await until(() => !document.querySelector('[role="dialog"]'));
-  click("审核");
+  click("Review");
   await until(
     () =>
       document.querySelector('[role="dialog"]') &&
@@ -212,17 +212,17 @@ try {
   );
   click("关闭弹窗");
   await until(() => !document.querySelector('[role="dialog"]'));
-  click("数据来源设置");
+  click("Data source settings");
   await until(() => document.querySelector('select[aria-label="codex"]'));
   assert.equal(document.querySelector('select[aria-label="codex"]').value, "auto");
-  assert.equal(document.querySelector('select[aria-label="其他执行后端"]').value, "edits");
-  await until(() => document.body.textContent.includes("无原生接口信号，自动使用插件汇总"));
+  assert.equal(document.querySelector('select[aria-label="Other agent backends"]').value, "edits");
+  await until(() => document.body.textContent.includes("no native signal, using plugin-collected edits"));
   const select = document.querySelector('select[aria-label="codex"]');
   select.value = "edits";
   select.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
-  await until(() => document.body.textContent.includes("设置已保存"));
+  await until(() => document.body.textContent.includes("Settings saved"));
   assert.equal(dom.window.TurnPreview.fixture.settings().values.providers.codex, "edits");
-  click("移除 codex 单独配置");
+  click("Remove override for codex");
   await until(() => !document.querySelector('select[aria-label="codex"]'));
   assert.equal(
     Object.hasOwn(dom.window.TurnPreview.fixture.settings().values.providers, "codex"),
