@@ -39,5 +39,8 @@
     "tsx": "^4.20.0",
     "typescript": "^5.9.3",
     "zod": "^4.4.3"
+  },
+  "overrides": {
+    "tinypool": "2.1.2"
   }
 }
